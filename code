@@ -1,0 +1,86 @@
+import requests
+
+# Function to check connection to Webex
+def check_connection(token):
+    url = "https://webexapis.com/v1/people/me"
+    headers = {"Authorization": f"Bearer {token}"}
+    response = requests.get(url, headers=headers)
+    return response.status_code == 200
+
+# Function to display user info
+def display_user_info(token):
+    url = "https://webexapis.com/v1/people/me"
+    headers = {"Authorization": f"Bearer {token}"}
+    response = requests.get(url, headers=headers)
+    user_info = response.json()
+    print("Displayed Name:", user_info.get("displayName"))
+    print("Nickname:", user_info.get("nickName"))
+    print("Emails:", user_info.get("emails"))
+
+# Function to list rooms
+def list_rooms(token):
+    url = "https://webexapis.com/v1/rooms"
+    headers = {"Authorization": f"Bearer {token}"}
+    response = requests.get(url, headers=headers)
+    rooms = response.json().get("items", [])
+    for room in rooms[:5]:  # Display first 5 rooms
+        print(f"Room ID: {room['id']}, Title: {room['title']}, Created: {room['created']}, Last Activity: {room['lastActivity']}")
+
+# Function to create a new room
+def create_room(token):
+    title = input("Enter the title of the room: ")
+    url = "https://webexapis.com/v1/rooms"
+    headers = {"Authorization": f"Bearer {token}", "Content-Type": "application/json"}
+    response = requests.post(url, headers=headers, json={"title": title})
+    if response.status_code == 201:
+        print("Room created successfully.")
+    else:
+        print("Failed to create room.")
+
+# Function to send a message to a room
+def send_message(token):
+    list_rooms(token)  # Display rooms first
+    room_id = input("Enter the Room ID to send a message to: ")
+    message = input("Enter your message: ")
+    url = "https://webexapis.com/v1/messages"
+    headers = {"Authorization": f"Bearer {token}", "Content-Type": "application/json"}
+    response = requests.post(url, headers=headers, json={"roomId": room_id, "text": message})
+    if response.status_code == 200:
+        print("Message sent successfully.")
+    else:
+        print("Failed to send message.")
+
+# Main function to run the application
+def main():
+    token = input("Enter your Webex token: ")
+    while True:
+        print("\nOptions:")
+        print("0: Test connection")
+        print("1: Display user information")
+        print("2: List rooms")
+        print("3: Create a room")
+        print("4: Send message to a room")
+        print("5: Exit")
+        choice = input("Choose an option: ")
+
+        if choice == '0':
+            if check_connection(token):
+                print("Connection successful!")
+            else:
+                print("Connection failed.")
+        elif choice == '1':
+            display_user_info(token)
+        elif choice == '2':
+            list_rooms(token)
+        elif choice == '3':
+            create_room(token)
+        elif choice == '4':
+            send_message(token)
+        elif choice == '5':
+            print("Exiting the application.")
+            break
+        else:
+            print("Invalid choice. Please try again.")
+
+if __name__ == "__main__":
+    main()
